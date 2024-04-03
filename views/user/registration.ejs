@@ -608,6 +608,12 @@
 							    		</div><!-- End .form-group -->
 
                                         <div class="form-group">
+							    			<label for="register-password-2">mobile *</label>
+							    			<input type="number" class="form-control" id="register-password-2" name="mobile" required>
+							    		</div><!-- End .form-group -->
+                                        
+
+                                        <div class="form-group">
 							    			<label for="register-password-2">Password *</label>
 							    			<input type="password" class="form-control" id="register-password-2" name="password" required>
 							    		</div><!-- End .form-group -->
@@ -615,13 +621,6 @@
                                         <div class="form-group">
 							    			<label for="register-password-2">confirm Password *</label>
 							    			<input type="password" class="form-control" id="register-password-2" name="cpassword" required>
-							    		</div><!-- End .form-group -->
-
-
-                                        
-                                        <div class="form-group">
-							    			<label for="register-password-2">mobile *</label>
-							    			<input type="number" class="form-control" id="register-password-2" name="mobile" required>
 							    		</div><!-- End .form-group -->
 
                                         
@@ -639,19 +638,20 @@
 							    		</div><!-- End .form-footer -->
 
                                         <div>
+                                            
                                             <% if(typeof message != ' undefined ') { %>
 
-                                                <p class="bg-dark   text-white  text-center  "><%= message %></p>
+                                                <p class="   text-danger     text-center  "><%= message %></p>
 
                                           <%  } %>
-
+                                              
                                         </div>
 
                                         
                                         
 							    	</form>
-							    	<div class="form-choice">
-								    	<p class="text-center">or sign in with</p>
+							    	<div class="form-choice mt-3 ">
+								    	<p class="text-center"> sign in with:</p>
 								    	<div class="row">
 								    		<div class="col-sm-6">
 								    			<a href="#" class="btn btn-login btn-g">

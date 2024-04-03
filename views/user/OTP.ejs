@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>OTP Page</title>
+ <!-- Bootstrap CSS -->
+ <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+ <!-- Custom CSS -->
+ <style>
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .otp-container {
+      background-color: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 300px;
+    }
+    #otpInput {
+      font-size: 1.2rem;
+      text-align: center;
+    }
+    .btn {
+      width: 100%;
+    }
+    #verifyButton {
+      margin-top: 10px;
+      font-size: 1.2rem;
+    }
+    #resendButton {
+      margin-top: 10px;
+      font-size: 1rem;
+    }
+ </style>
+</head>
+<body>
+
+<div class="container">
+ <div class="otp-container w-50 ">
+    <h2 class="mb-4">Enter OTP</h2>
+    <div id="otpInput" class="mb-3">
+      <form action="/verify" method="post">
+      <input type="text" name="otp" class="form-control" placeholder="Enter OTP" maxlength="6" required>
+    </div>
+    <div id="timer" class="text-muted mt-3"> 01:00</div>
+    <div>
+      <% if(typeof message !='undefined'){ %>
+        <p class="text-danger text-center "><%= message  %></p>
+      <% } %>
+    </div>
+    <button id="resendButton" class="btn btn-primary w-25 text-center " disabled>Resend</button>
+    <input type="submit" id="verifyButton" class="btn btn-success mb-3" value="verify">
+      
+ </form>
+ </div>
+</div>
+
+<!-- Bootstrap JS (optional) -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+  
+ window.onload = function () {
+    startTimer(60, document.getElementById('timer'));
+    document.getElementById('resendButton').disabled = true;
+ };
+
+
+ function startTimer(duration, display) {
+    var timer = duration, minutes, seconds;
+    var intervalId = setInterval(function () {
+      minutes = parseInt(timer / 60, 10);
+      seconds = parseInt(timer % 60, 10);
+
+      minutes = minutes < 10 ? "0" + minutes : minutes;
+      seconds = seconds < 10 ? "0" + seconds : seconds;
+
+      display.textContent = minutes + ":" + seconds;
+
+      if (--timer < 0) {
+        clearInterval(intervalId);
+        display.textContent = "OTP expired";
+        document.getElementById('resendButton').disabled = false;
+      }
+    }, 1000);
+ }
+
+ function resendOTP() {
+    console.log("Resending OTP...");
+    document.getElementById('resendButton').disabled = true;
+    startTimer(60, document.getElementById('timer'));
+ }
+
+//  document.getElementById('verifyButton').addEventListener('click', function(event) {
+//     event.preventDefault();
+//     verifyOTP();
+//  });
+
+ document.getElementById('resendButton').addEventListener('click', function() {
+    resendOTP();
+ });
+
+
+
+</script>
+
+</body>
+</html>
