@@ -44,16 +44,17 @@
  <div class="otp-container w-50 ">
     <h2 class="mb-4">Enter OTP</h2>
     <div id="otpInput" class="mb-3">
-      <form action="/verify" method="post">
-      <input type="text" name="otp" class="form-control" placeholder="Enter OTP" maxlength="6" required>
+      <form id="otpForm" action="/verify" method="post">
+      <input type="text" name="otp" class="form-control" placeholder="Enter OTP" maxlength="6" >
     </div>
-    <div id="timer" class="text-muted mt-3"> 01:00</div>
-    <div>
-      <% if(typeof message !='undefined'){ %>
-        <p class="text-danger text-center "><%= message  %></p>
-      <% } %>
-    </div>
-    <button id="resendButton" class="btn btn-primary w-25 text-center " disabled>Resend</button>
+    <div id="timer" class="text-muted mt-3"> 00:30</div>
+   <div>
+    <% if (typeof messages !== 'undefined' && messages) { %>
+      <p class="text-danger text-center "><%= messages %></p>
+  <% } %>
+   </div>
+  
+    <button id="resendButton" class="btn btn-primary w-25 text-center" type="button">Resend</button>
     <input type="submit" id="verifyButton" class="btn btn-success mb-3" value="verify">
       
  </form>
@@ -66,9 +67,36 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 <script>
+ document.addEventListener("DOMContentLoaded", function() {
+   const resendButton = document.getElementById("resendButton");
+   const otpForm = document.getElementById("otpForm");
+   const verifyButton = document.getElementById('verifyButton')
+
+
+   //Add event listener for verify button
+   verifyButton.addEventListener('click',function(){
+    //change form action to /verify
+    otpForm.action = '/verify';
+    //change the method of form to post 
+    otpForm.method = 'post';
+    //submit the form 
+    // otpForm.submit();
+   });
+   
+   // Add event listener for resend button
+   resendButton.addEventListener("click", function() {
+    window.onload()
+     // Change form action to /resend
+     otpForm.action = "/resend";
+     //change the method of form to get
+     otpForm.method = "get"
+     // Submit the form
+     otpForm.submit();
+   });
+ });
   
  window.onload = function () {
-    startTimer(60, document.getElementById('timer'));
+    startTimer(30, document.getElementById('timer'));
     document.getElementById('resendButton').disabled = true;
  };
 
@@ -91,23 +119,6 @@
       }
     }, 1000);
  }
-
- function resendOTP() {
-    console.log("Resending OTP...");
-    document.getElementById('resendButton').disabled = true;
-    startTimer(60, document.getElementById('timer'));
- }
-
-//  document.getElementById('verifyButton').addEventListener('click', function(event) {
-//     event.preventDefault();
-//     verifyOTP();
-//  });
-
- document.getElementById('resendButton').addEventListener('click', function() {
-    resendOTP();
- });
-
-
 
 </script>
 

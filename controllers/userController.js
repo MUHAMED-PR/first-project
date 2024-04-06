@@ -4,6 +4,7 @@ const OTP = require('../models/OTP')
 const bcrypt = require('bcrypt')
 const { tryCatch } = require('engine/utils')
 const nodemailer = require('nodemailer')
+const flash = require('express-flash')
 require('dotenv').config()
 
 const securePassword = async (password) => {
@@ -12,6 +13,14 @@ const securePassword = async (password) => {
         return passwordHash
     } catch (error) {
         console.log(error.message);
+    }
+}
+
+const homePage = (req,res)=>{
+    try {
+        res.render('homePage')
+    } catch (error) {
+        console.log(error);
     }
 }
 
@@ -26,7 +35,7 @@ const signUp = (req, res) => {
 }
 const otpGenerate =  (req,res) => {
     try {
-
+console.log('otp is generating');
         const digits = '0123456789';
         let OTP = '';
         for (let i = 0; i < 4; i++) {
@@ -63,7 +72,7 @@ const insertUser = async (req, res) => {
     try {
 
         const emailExisting = await users.findOne({ email: req.body.email })
-        // console.log('emailExisting.....   '+emailExisting)
+       
 
         if (emailExisting) {
             const message = 'This email is already registered!'
@@ -80,7 +89,7 @@ const insertUser = async (req, res) => {
             mobile: req.body.mobile
         })
         const userData = await user.save()
-        // console.log('userData....     '+userData)
+        console.log('userData....     '+userData)
 
         if (userData) {
             const genotp = otpGenerate()
@@ -90,7 +99,7 @@ const insertUser = async (req, res) => {
             let savingotp = saveOtp(req.body.email , genotp)
             let response = sendVerifyMail(req.body.name, req.body.email, userData._id, genotp)
 
-            const message = 'your registration has been successful'
+            // const message = 'your registration has been successful'
             // res.render('registration',{message:message})
 
             res.render('OTP')
@@ -104,8 +113,6 @@ const insertUser = async (req, res) => {
         console.log(error.message);
     }
 }
-
-
 
 
 // //for send mail
@@ -163,9 +170,12 @@ const verifyMail = async (req, res) => {
         
         const updateInfo = await users.updateOne({ email: req.session.email }, { $set: { is_verified: 1 } })
         console.log(updateInfo+' verified');
-        res.render("homePage")
-    }else{
-        let message = 'otp is not matched'
+        
+        res.render("homePage",{message : ''})
+    }
+    else{
+        req.flash('error', 'OTP is not matched');
+        res.redirect('/otp'); // Redirect to the OTP page
     }
 }
 catch (error) {
@@ -174,12 +184,57 @@ catch (error) {
 }
 
 
+//Resend otp
+const resendOTP = async (req,res)=>{
+    try {
+        console.log('resendotp reached');
+        const reOtp = otpGenerate()
+        console.log(reOtp+' is the reOTP');
+        
+
+        let saveReOtp = saveOtp(req.session.email,reOtp)
+        let response = sendVerifyMail(req.session.name,req.session.email,req.session._id,reOtp)
+
+    } catch(error){
+        console.log(error);
+    }
+}
+
+const verifyLogin = async(req,res)=>{
+    try{
+        const email = req.body.email
+        const password =req.body.password
+
+        const userData = await users.findOne({email:email})
+
+        if(userData){
+            const passwordMatch = await bcrypt.compare(password,userData.password)
+                if(passwordMatch){
+                    if(userData.is_verified===0){
+                        res.render('registration',{message:'please verify your email'})
+                    }else{
+                        req.session.user_id=userData._id
+                        res.redirect('/homePage')
+                    }
+
+                }else{
+                    res.render('registration',{message:'Email and password is incorrect'})
+                }
+            
+        }   
+    }catch(error){
+        console.log(error);
+    }
+}
+
 module.exports = {
     signUp,
     insertUser,
     verifyMail,
     // otpVerificationEmail,
-    // homePage,
+    homePage,
+    verifyLogin,
+    resendOTP
 
 
 }

@@ -9,6 +9,7 @@ const path = require('path')
 const nocache = require('nocache')
 const dotenv=require('dotenv')
 const  bodyParser = require('body-parser')
+const flash = require('express-flash')
 dotenv.config()
 const app = express();
 app.use(bodyParser.json())
@@ -25,6 +26,7 @@ const userRoute=require("./router/userRoute");
 
 app.use('/',userRoute);
 app.use(express.static(path.join(__dirname,'public')))
+app.use(flash())
 
 
 app.listen(3000,()=>{
