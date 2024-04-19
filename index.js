@@ -17,16 +17,21 @@ app.use(bodyParser.urlencoded({extended:true}))
 
 app.set('view engine','ejs');
 
-// Set the views directory
-app.set('views','./views/user');
+
+app.use(express.static(path.join(__dirname,'public')))
+app.use(flash())
+
 
 
 const userRoute=require("./router/userRoute");
-// const adminRoute=require("./router/adminRoute");
+const adminRoute = require('./router/adminRoute');
+
+
 
 app.use('/',userRoute);
-app.use(express.static(path.join(__dirname,'public')))
-app.use(flash())
+app.use('/admin',adminRoute);
+
+
 
 
 app.listen(3000,()=>{

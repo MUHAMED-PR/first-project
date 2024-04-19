@@ -7,6 +7,8 @@ const nodemailer = require('nodemailer')
 const flash = require('express-flash')
 require('dotenv').config()
 
+
+
 const securePassword = async (password) => {
     try {
         const passwordHash = await bcrypt.hash(password, 10)
@@ -18,7 +20,7 @@ const securePassword = async (password) => {
 
 const homePage = (req,res)=>{
     try {
-        res.render('homePage')
+        res.render('user/homePage')
     } catch (error) {
         console.log(error);
     }
@@ -27,7 +29,7 @@ const homePage = (req,res)=>{
 
 const signUp = (req, res) => {
     try {
-        res.render('registration', { message: '' });
+        res.render('user/registration', { message: '' });
     } catch (error) {
         console.log(error);
 
@@ -76,7 +78,7 @@ const insertUser = async (req, res) => {
 
         if (emailExisting) {
             const message = 'This email is already registered!'
-            return res.render('registration', { message: message })
+            return res.render('user/registration', { message: message })
         }
         const spassword = await securePassword(req.body.password)
         // console.log('spassword.....     '+spassword)
@@ -101,12 +103,12 @@ const insertUser = async (req, res) => {
 
             // const message = 'your registration has been successful'
             // res.render('registration',{message:message})
-
-            res.render('OTP')
+            console.log(typeof message)
+            res.render('user/OTP',{message:''})
         }
         else {
             const message = 'your registration has been failed'
-            res.render('registration', { message: message })
+            res.render('user/registration', { message:''})
         }
 
     } catch (error) {
@@ -160,25 +162,24 @@ const sendVerifyMail = async (name, email, user_id, otp) => {
     }
 }
 
-
-const verifyMail = async (req, res) => {
+const verifyOTP = async (req, res) => {
     try {
         console.log(req.body.otp+'it is otpppppppp')
         console.log(req.session.email + " is email")
         let storedotp = await OTP.findOne({email:req.session.email})
+        console.log('Stored OTP:', storedotp.otp);
+        console.log('Entered OTP:', req.body.otp);
         if(storedotp.otp==req.body.otp){ 
         
-        const updateInfo = await users.updateOne({ email: req.session.email }, { $set: { is_verified: 1 } })
-        console.log(updateInfo+' verified');
-        
-        res.render("homePage",{message : ''})
-    }
-    else{
-        req.flash('error', 'OTP is not matched');
-        res.redirect('/otp'); // Redirect to the OTP page
-    }
-}
-catch (error) {
+            const updateInfo = await users.updateOne({ email: req.session.email }, { $set: { is_verified: 1 } })
+            console.log(updateInfo +' verified');
+            
+            res.render("user/homePage",{message :''})
+        }else {
+            // Render the OTP page with the error message
+            res.render("user/OTP",{message:'OTP is not matched'});
+        }
+    } catch (error) {
         console.log(error.message)
     }
 }
@@ -211,30 +212,49 @@ const verifyLogin = async(req,res)=>{
             const passwordMatch = await bcrypt.compare(password,userData.password)
                 if(passwordMatch){
                     if(userData.is_verified===0){
-                        res.render('registration',{message:'please verify your email'})
+                        res.render('user/registration',{message:'please verify your email'})
                     }else{
                         req.session.user_id=userData._id
                         res.redirect('/homePage')
                     }
 
                 }else{
-                    res.render('registration',{message:'Email and password is incorrect'})
+                    res.render('user/registration',{message:'Email and password is incorrect'})
                 }
             
-        }   
+        }
     }catch(error){
         console.log(error);
     }
 }
 
-module.exports = {
-    signUp,
-    insertUser,
-    verifyMail,
-    // otpVerificationEmail,
-    homePage,
-    verifyLogin,
-    resendOTP
+const userLogin = async(req,res)=>{
+    try{
+        const email = req.body.email;
+        console.log(email+' is the entered email...')
+        const password = req.body.password;
+
+            const userData = await users.findOne({email:email})
+            if(userData){
+                res.render('user/homePage',{message:''})
+            }else{
+                res.render('user/registration',{message:'Please Register'})
+            }
+
+        } catch(error){
+            console.log(error);
+        }
+    }
+
+    module.exports = {
+        signUp,
+        insertUser,
+        verifyOTP,
+        // otpVerificationEmail,
+        homePage,
+        verifyLogin,
+        resendOTP,
+        userLogin
 
 
-}
+    }

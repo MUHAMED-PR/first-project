@@ -44,16 +44,19 @@
  <div class="otp-container w-50 ">
     <h2 class="mb-4">Enter OTP</h2>
     <div id="otpInput" class="mb-3">
-      <form id="otpForm" action="/verify" method="post">
+      <form id="otpForm" action="" method="">
       <input type="text" name="otp" class="form-control" placeholder="Enter OTP" maxlength="6" >
     </div>
     <div id="timer" class="text-muted mt-3"> 00:30</div>
-   <div>
-    <% if (typeof messages !== 'undefined' && messages) { %>
-      <p class="text-danger text-center "><%= messages %></p>
-  <% } %>
-   </div>
-  
+    <div>
+                                            
+      <% if(typeof message != ' undefined ') { %>
+
+          <p class="   text-danger     text-center  "><%= message %></p>
+
+    <%  } %>
+        
+  </div>
     <button id="resendButton" class="btn btn-primary w-25 text-center" type="button">Resend</button>
     <input type="submit" id="verifyButton" class="btn btn-success mb-3" value="verify">
       
@@ -67,58 +70,65 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 <script>
- document.addEventListener("DOMContentLoaded", function() {
-   const resendButton = document.getElementById("resendButton");
-   const otpForm = document.getElementById("otpForm");
-   const verifyButton = document.getElementById('verifyButton')
+document.addEventListener("DOMContentLoaded", function() {
+    const resendButton = document.getElementById("resendButton");
+    const otpForm = document.getElementById("otpForm");
+    const verifyButton = document.getElementById('verifyButton');
+    const timerDisplay = document.getElementById('timer');
+    let timerStarted = false;
 
+    // Add event listener for verify button
+    verifyButton.addEventListener('click',function(){
+        // Change form action to /verify
+        otpForm.action = '/home';
+        // Change the method of form to post
+        otpForm.method = 'post';
+        // Submit the form
+        otpForm.submit();
+    });
 
-   //Add event listener for verify button
-   verifyButton.addEventListener('click',function(){
-    //change form action to /verify
-    otpForm.action = '/verify';
-    //change the method of form to post 
-    otpForm.method = 'post';
-    //submit the form 
-    // otpForm.submit();
-   });
-   
-   // Add event listener for resend button
-   resendButton.addEventListener("click", function() {
-    window.onload()
-     // Change form action to /resend
-     otpForm.action = "/resend";
-     //change the method of form to get
-     otpForm.method = "get"
-     // Submit the form
-     otpForm.submit();
-   });
- });
-  
- window.onload = function () {
-    startTimer(30, document.getElementById('timer'));
+    // Add event listener for resend button
+    resendButton.addEventListener("click", function() {
+        // Change form action to /resend
+        otpForm.action = "/resend";
+        // Change the method of form to get
+        otpForm.method = "get";
+        // Submit the form
+        otpForm.submit();
+    });
+
+    // Function to start the timer if it hasn't already started
+    function startTimerIfNeeded(duration, display) {
+        if (!timerStarted) {
+            startTimer(duration, display);
+            timerStarted = true;
+        }
+    }
+
+    // Function to start the timer
+    function startTimer(duration, display) {
+        var timer = duration, minutes, seconds;
+        var intervalId = setInterval(function () {
+            minutes = parseInt(timer / 60, 10);
+            seconds = parseInt(timer % 60, 10);
+
+            minutes = minutes < 10 ? "0" + minutes : minutes;
+            seconds = seconds < 10 ? "0" + seconds : seconds;
+
+            display.textContent = minutes + ":" + seconds;
+
+            if (--timer < 0) {
+                clearInterval(intervalId);
+                display.textContent = "OTP expired";
+                document.getElementById('resendButton').disabled = false;
+            }
+        }, 1000);
+    }
+
+    // Start the timer when the page loads
+    startTimerIfNeeded(30, timerDisplay);
     document.getElementById('resendButton').disabled = true;
- };
-
-
- function startTimer(duration, display) {
-    var timer = duration, minutes, seconds;
-    var intervalId = setInterval(function () {
-      minutes = parseInt(timer / 60, 10);
-      seconds = parseInt(timer % 60, 10);
-
-      minutes = minutes < 10 ? "0" + minutes : minutes;
-      seconds = seconds < 10 ? "0" + seconds : seconds;
-
-      display.textContent = minutes + ":" + seconds;
-
-      if (--timer < 0) {
-        clearInterval(intervalId);
-        display.textContent = "OTP expired";
-        document.getElementById('resendButton').disabled = false;
-      }
-    }, 1000);
- }
+});
 
 </script>
 
