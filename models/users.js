@@ -17,6 +17,10 @@ const userSchema = new mongoose.Schema({
         type:Number,
         required:true
     },
+    dateOfJoined:{
+        type:Date,
+        default:Date.now
+    },
     is_admin:{
         type:Number,
         required:true,

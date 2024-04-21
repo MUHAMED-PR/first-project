@@ -18,7 +18,6 @@ userRoute.use(session({secret:config.sessionSecret}))
 
 // }))
 
-
 userRoute.get('/',userController.homePage)
 userRoute.get('/signup',userController.signUp);
 userRoute.post('/register',userController.insertUser)

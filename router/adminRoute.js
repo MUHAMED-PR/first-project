@@ -7,10 +7,13 @@ const app = express()
 
 
 
-app.set('view','../views/admin')
-app.set('views', path.join(__dirname, 'views', 'admin'));
+app.set('view engine','ejs')
+app.set('views', './views/admin');
 
 
-adminRoute.get('/dashboard',adminController.adminDash)
+adminRoute.get('/dashboard',adminController.adminDashboard)
+adminRoute.get('/login',adminController.adminLogin)
+adminRoute.get('/users',adminController.costumer)
+adminRoute.post('/login',adminController.adminVerify)
 
 module.exports = adminRoute;
