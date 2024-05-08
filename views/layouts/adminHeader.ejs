@@ -44,6 +44,7 @@
 
     <!-- Icons. Uncomment required icon fonts -->
     <link rel="stylesheet" href="/admin/assets/vendor/fonts/boxicons.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <!-- Core CSS -->
     <link rel="stylesheet" href="/admin/assets/vendor/css/core.css" class="template-customizer-core-css" />
@@ -131,7 +132,7 @@
                 </g>
               </svg>
             </span>
-            <span class="app-brand-text text-uppercase demo menu-text fw-bolder ms-2">Admin Panel</span>
+            <span class="app-brand-text text-uppercase demo menu-text fw-bolder ms-2 ">Admin Panel</span>
           </a>
 
           <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
@@ -143,7 +144,7 @@
 
         <ul class="menu-inner py-1">
           <!-- Dashboard -->
-          <li class="menu-item active">
+          <li class="menu-item ">
             <a href="/admin/dashboard" class="menu-link">
               <i class="menu-icon tf-icons bx bx-home-circle"></i>
               <div data-i18n="Analytics">Dashboard</div>
@@ -151,50 +152,60 @@
 
 
         
-    <!-- ====================================================================================== -->
+           <!-- ================================================================================ -->
               
           <!-- Tables -->
-          <li class="menu-item">
-            <a href="/admin/users" class="menu-link">
-              <i class="menu-icon tf-icons bx bx-table"></i>
-              <img src="/admin/assets/img/icons/brands/Customer-icon" alt="">
-              <div data-i18n="Analytics">Customers</div>
+          <li class="menu-item ">
+            <a href="/admin/customer" class="menu-link">
+              <i class="menu-icon bx bx-group accordion "></i>
+
+                <div data-i18n="Analytics"> Customers</div>
             </a>
           </li>
           <!-- Misc -->
           <!-- <li class="menu-header small text-uppercase"><span class="menu-header-text">Misc</span></li> -->
-          <li class="menu-item">
-            <a
-              href=""
-            
-              class="menu-link"
-            >
-              <i class="menu-icon tf-icons bx bx-table"></i>
+          <li class="menu-item ">
+            <a href="/admin/products" class="menu-link" >
+              <i class="menu-icon bx bx-cart"></i>
               <div data-i18n="Support">Products</div>
             </a>
           </li>
-          <li class="menu-item">
-            <a
-              href=""
-            
-              class="menu-link"
-            >
-              <i class="menu-icon tf-icons bx bx-file"></i>
+          <li class="menu-item ">
+            <a href="/admin/category" class="menu-link">
+              <i class="menu-icon tf-icons bx bx-list-ul"></i>
               <div data-i18n="Documentation">Category</div>
             </a>
           </li>
-          <li class="menu-item">
-            <a
-              href="/admin/login"
-            
-              class="menu-link"
-            >
-              <i class="menu-icon tf-icons bx bx-file"></i>
+          <li class="menu-item ">
+            <a href="/admin/login" class="menu-link">
+              <i class="menu-icon tf-icons bx bx-log-out"></i>
               <div>Logout</div>
             </a>
           </li>
         </ul>
       </aside>
 
+
+      <!-- ============================= -->
+    <!-- <script>
+      document.addEventListener("DOMContentLoaded", function () {
+    // Get all menu items
+    const menuItems = document.querySelectorAll('.menu-item');
+
+    // Add click event listener to each menu item
+    menuItems.forEach(function (menuItem) {
+        menuItem.addEventListener('click', function () {
+            // Remove "active" class from all menu items
+            menuItems.forEach(function (item) {
+                item.classList.remove('active');
+            });
+
+            // Add "active" class to the clicked menu item
+            this.classList.add('active');
+        });
+    });
+});
+
+    </script> -->
 
       

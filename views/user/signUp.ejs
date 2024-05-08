@@ -35,8 +35,8 @@
                                 <ul>
                                     <li><a href="tel:#"><i class="icon-phone"></i>Call: +0123 456 789</a></li>
                                     <li><a href="#"><i class="icon-heart-o"></i>Wishlist <span>(3)</span></a></li>
-                                    <li><a href="about.html">About Us</a></li>
-                                    <li><a href="contact.html">Contact Us</a></li>
+                                    <li><a href="#">About Us</a></li>
+                                    <li><a href="#">Contact Us</a></li>
                                    
                                 </ul>
                             </li>
@@ -53,7 +53,7 @@
                             <i class="icon-bars"></i>
                         </button>
 
-                        <a href="index.html" class="logo">
+                        <a href="#" class="logo">
                             <img src="assets/images/logo.png" alt="Molla Logo" width="105" height="25">
                         </a>
 
@@ -118,7 +118,7 @@
             <nav aria-label="breadcrumb" class="breadcrumb-nav border-0 mb-0">
                 <div class="container">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
                         <li class="breadcrumb-item"><a href="#">Pages</a></li>
                         <li class="breadcrumb-item active" aria-current="page">Login</li>
                     </ol>
@@ -130,65 +130,12 @@
             		<div class="form-box">
             			<div class="form-tab">
 	            			<ul class="nav nav-pills nav-fill" role="tablist">
-							    <li class="nav-item">
-							        <a class="nav-link" id="signin-tab-2" data-toggle="tab" href="#signin-2" role="tab" aria-controls="signin-2" aria-selected="false">Sign In</a>
-							    </li>
+							   
 							    <li class="nav-item">
 							        <a class="nav-link active" id="register-tab-2" data-toggle="tab" href="#register-2" role="tab" aria-controls="register-2" aria-selected="true">Register</a>
 							    </li>
 							</ul>
-							<div class="tab-content">
-							    <div class="tab-pane fade" id="signin-2" role="tabpanel" aria-labelledby="signin-tab-2">
-							    	<form action="/userlogin" method="post">
-							    		<div class="form-group">
-							    			<label for="singin-email-2">email address *</label>
-							    			<input type="text" class="form-control" id="singin-email-2" name="email" required>
-							    		</div><!-- End .form-group -->
-
-							    		<div class="form-group">
-							    			<label for="singin-password-2">Password *</label>
-							    			<input type="password" class="form-control" id="singin-password-2" name="singin-password" required>
-							    		</div><!-- End .form-group -->
-
-                                        <div>
-                                            <% if(typeof message !='undefined')  {%>
-
-                                                <p class="text-danger  text-center "><%= message %></p>
-                                                <% } %>
-                                        </div>
-
-							    		<div class="form-footer">
-							    			<button type="submit" class="btn btn-outline-primary-2">
-			                					<span>LOG IN</span>
-			            						<i class="icon-long-arrow-right"></i>
-			                				</button>
-
-			                				<div class="custom-control custom-checkbox">
-												<input type="checkbox" class="custom-control-input" id="signin-remember-2">
-												<label class="custom-control-label" for="signin-remember-2">Remember Me</label>
-											</div><!-- End .custom-checkbox -->
-
-											<a href="#" class="forgot-link">Forgot Your Password?</a>
-							    		</div><!-- End .form-footer -->
-							    	</form>
-							    	<div class="form-choice">
-								    	<p class="text-center">or sign in with</p>
-								    	<div class="row">
-								    		<div class="col-sm-6">
-								    			<a href="#" class="btn btn-login btn-g">
-								    				<i class="icon-google"></i>
-								    				Login With Google
-								    			</a>
-								    		</div><!-- End .col-6 -->
-								    		<div class="col-sm-6">
-								    			<a href="#" class="btn btn-login btn-f">
-								    				<i class="icon-facebook-f"></i>
-								    				Login With Facebook
-								    			</a>
-								    		</div><!-- End .col-6 -->
-								    	</div><!-- End .row -->
-							    	</div><!-- End .form-choice -->
-							    </div><!-- .End .tab-pane -->
+							
 							    <div class="tab-pane fade show active" id="register-2" role="tabpanel" aria-labelledby="register-tab-2">
 							    	<form action="/register" method="post">
 							    		<div class="form-group">
@@ -226,10 +173,10 @@
 			                				</button>
 
 			                				<div class="custom-control custom-checkbox">
-												<input type="checkbox" class="custom-control-input" id="register-policy-2" required>
+												<input type="checkbox" class="custom-control-input" id="register-policy-2" >
 												<label class="custom-control-label" for="register-policy-2">I agree to the <a href="#">privacy policy</a> *</label>
-											</div><!-- End .custom-checkbox -->
-							    		</div><!-- End .form-footer -->
+											</div>
+							    		</div>
 
                                         <div>
                                             
@@ -245,18 +192,17 @@
                                         
 							    	</form>
 							    	<div class="form-choice mt-3 ">
-								    	<p class="text-center"> sign in with:</p>
 								    	<div class="row">
 								    		<div class="col-sm-6">
-								    			<a href="#" class="btn btn-login btn-g">
+								    			<a href="/auth/google" class="btn btn-login btn-g">
 								    				<i class="icon-google"></i>
 								    				Login With Google
 								    			</a>
 								    		</div><!-- End .col-6 -->
 								    		<div class="col-sm-6">
-								    			<a href="#" class="btn btn-login  btn-f">
-								    				<i class="icon-facebook-f"></i>
-								    				Login With Facebook
+								    			<a href="/signIn" class="btn btn-login  btn-f">
+								    			
+								    				Already registered !
 								    			</a>
 								    		</div><!-- End .col-6 -->
 								    	</div><!-- End .row -->
@@ -632,6 +578,8 @@
         </div><!-- End .modal-dialog -->
     </div><!-- End .modal -->
 
-    
+    <script>
+        
+    </script>
 
    <%- include('../layouts/footer.ejs') %>

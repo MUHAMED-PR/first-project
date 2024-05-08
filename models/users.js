@@ -30,6 +30,11 @@ const userSchema = new mongoose.Schema({
         type:Number,
         required:true,
         default:0
+    },
+    is_blocked:{
+        type:Boolean,
+        required:true,
+        default:false
     }
 })
 

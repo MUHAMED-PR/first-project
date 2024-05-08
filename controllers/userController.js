@@ -1,6 +1,7 @@
 // const { tryCatch } = require('engine/utils');
 const users = require('../models/users')
 const OTP = require('../models/OTP')
+const product = require('../models/product')
 const bcrypt = require('bcrypt')
 const { tryCatch } = require('engine/utils')
 const nodemailer = require('nodemailer')
@@ -27,12 +28,19 @@ const homePage = (req,res)=>{
 }
 
 
-const signUp = (req, res) => {
+const signIn = (req, res) => {
     try {
-        res.render('user/registration', { message: '' });
+        res.render('user/signIn', { message: '' });
     } catch (error) {
         console.log(error);
 
+    }
+}
+const signUp = async(req,res)=>{
+    try {
+        res.render('user/signUp', {message:''})
+    } catch (error) {
+        console.log(error)
     }
 }
 const otpGenerate =  (req,res) => {
@@ -54,14 +62,17 @@ console.log('otp is generating');
 }
 
 
+
 const saveOtp = async (email, otp) => {
     try {
+        // console.log(email,' email otp sended..');
+        // console.log(otp,' saved otp ');
 
         let saveOtp = new OTP({
             email: email,
             otp: otp
         })
-        await saveOtp.save();
+       await saveOtp.save();
 
 
     } catch (error) {
@@ -69,16 +80,28 @@ const saveOtp = async (email, otp) => {
     }
 }
 
+
+const getOtp = async (req,res)=>{
+    try {
+        res.render('user/OTP')
+    } catch (error) {
+        console.error('Error foundednin get otp',error);
+    }
+}
 //registration of a user
 const insertUser = async (req, res) => {
     try {
+        res.render('user/signUp')
 
-        const emailExisting = await users.findOne({ email: req.body.email })
+        const regex = new RegExp(req.body.email, 'i');
+        const emailExisting = await users.findOne({ email: regex });
+        
+
        
 
         if (emailExisting) {
             const message = 'This email is already registered!'
-            return res.render('user/registration', { message: message })
+            return res.render('user/signUp', { message: message })
         }
         const spassword = await securePassword(req.body.password)
         // console.log('spassword.....     '+spassword)
@@ -90,6 +113,7 @@ const insertUser = async (req, res) => {
             cpassword: spassword,
             mobile: req.body.mobile
         })
+       
         const userData = await user.save()
         console.log('userData....     '+userData)
 
@@ -97,7 +121,7 @@ const insertUser = async (req, res) => {
             const genotp = otpGenerate()
             console.log(genotp + ' is the otp');
             req.session.email = req.body.email
-
+           
             let savingotp = saveOtp(req.body.email , genotp)
             let response = sendVerifyMail(req.body.name, req.body.email, userData._id, genotp)
 
@@ -108,7 +132,7 @@ const insertUser = async (req, res) => {
         }
         else {
             const message = 'your registration has been failed'
-            res.render('user/registration', { message:''})
+            res.render('user/signUp', { message:''})
         }
 
     } catch (error) {
@@ -167,14 +191,19 @@ const verifyOTP = async (req, res) => {
         console.log(req.body.otp+'it is otpppppppp')
         console.log(req.session.email + " is email")
         let storedotp = await OTP.findOne({email:req.session.email})
-        console.log('Stored OTP:', storedotp.otp);
-        console.log('Entered OTP:', req.body.otp);
+        // console.log('Stored', storedotp);
+        // console.log('Stored OTP:', storedotp.otp);
+        // console.log('Entered OTP:', req.body.otp);
         if(storedotp.otp==req.body.otp){ 
         
             const updateInfo = await users.updateOne({ email: req.session.email }, { $set: { is_verified: 1 } })
-            console.log(updateInfo +' verified');
-            
+            // console.log(updateInfo +' verified');
+            // const user= await users.findOne({email:req.session.email})
+            // console.log(user,'user in verifyotp');
+            // req.session.user_id=user._id
+            // console.log(req.session.user_id,'req.session.user_id');
             res.render("user/homePage",{message :''})
+            
         }else {
             // Render the OTP page with the error message
             res.render("user/OTP",{message:'OTP is not matched'});
@@ -188,13 +217,20 @@ const verifyOTP = async (req, res) => {
 //Resend otp
 const resendOTP = async (req,res)=>{
     try {
-        console.log('resendotp reached');
+        // console.log('resendotp reached');
         const reOtp = otpGenerate()
         console.log(reOtp+' is the reOTP');
+        console.log(req.session.email,'  email on session..');
+        
+        const id= await users.findOne({email:req.session.email})
+        // console.log(id,'id in resendd otp');
         
 
         let saveReOtp = saveOtp(req.session.email,reOtp)
-        let response = sendVerifyMail(req.session.name,req.session.email,req.session._id,reOtp)
+        // console.log(saveReOtp,'save re otp');
+        let response = sendVerifyMail(id.name,req.session.email,id._id,reOtp)
+        // console.log(response,'response in resend ot p');
+        res.redirect('/OTP')
 
     } catch(error){
         console.log(error);
@@ -205,56 +241,127 @@ const verifyLogin = async(req,res)=>{
     try{
         const email = req.body.email
         const password =req.body.password
-
         const userData = await users.findOne({email:email})
 
         if(userData){
             const passwordMatch = await bcrypt.compare(password,userData.password)
                 if(passwordMatch){
-                    if(userData.is_verified===0){
-                        res.render('user/registration',{message:'please verify your email'})
+                    if(userData.is_blocked==false){
+                        if(!userData.is_verified){
+                            const genotp = otpGenerate()
+                            console.log(genotp + ' is the otp');
+                            req.session.email = req.body.email
+                            
+                            let savingotp = saveOtp(req.body.email , genotp)
+                            let response = sendVerifyMail(req.body.name, req.body.email, userData._id, genotp)
+                            res.render('user/OTP', { message:'please verify your email' })
+                        }else{
+                            req.session.user_id=userData._id
+                            res.render('user/homePage', {message:''})
+                        }
+
                     }else{
-                        req.session.user_id=userData._id
-                        res.redirect('/homePage')
+                        console.log('admin is blocked you !..')
+                        res.render('user/signIn', {message:'Admin is blocked You !..'})
                     }
 
                 }else{
-                    res.render('user/registration',{message:'Email and password is incorrect'})
+                    res.render('user/signIn', { message:'Password is incorrect' })
                 }
             
+        }else{
+            res.render('user/signIn', { message:'Email  is incorrect' })
         }
     }catch(error){
         console.log(error);
     }
 }
 
-const userLogin = async(req,res)=>{
-    try{
-        const email = req.body.email;
-        console.log(email+' is the entered email...')
-        const password = req.body.password;
-
-            const userData = await users.findOne({email:email})
-            if(userData){
-                res.render('user/homePage',{message:''})
-            }else{
-                res.render('user/registration',{message:'Please Register'})
-            }
-
-        } catch(error){
-            console.log(error);
-        }
+//Auth for Google with login
+const successGoogleLogin = async (req,res)=>{
+    console.log('google')
+   
+        res.render('user/homePage')
+       
+        // res.send('Welcome ',req.user.email)
     }
 
+
+
+const failureGoogleLogin = async(req,res)=>{
+    console.log('Error');
+}
+
+const loadShopPage = async(req,res)=>{
+    try {
+        const products = await product.find()
+
+        res.render('user/shop',{products})
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+const loadProductDetails = async(req,res)=>{
+    try {
+       
+       const productId = req.params.productId
+       console.log(productId,' productId')
+        const productdetails = await product.findOne({_id:productId})
+        // console.log(productdetails+"it is productdetails")
+        console.log('jhnjkbjhb');
+        res.render('user/product',{productdetails})
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+const forgotPassword = async(req,res)=>{
+    try {
+        res.render('user/forgotPass',{message:''})
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+const resetPassword = async(req,res)=>{
+    try {
+       const theEmail = req.body.email
+        const emailCheck = await users.findOne()
+        if(emailCheck.theEmail){
+            const genotp = otpGenerate()
+            console.log(genotp + ' is the otp');
+
+            let savingotp = saveOtp(emailCheck.userName , genotp)
+            let response = sendVerifyMail(emailCheck.userName, emailCheck.email, emailCheck._id, genotp)
+            req.flash('success', 'An OTP has been sent to your email. Please check your inbox.');
+
+            res.redirect('/OTP')
+        }else{
+            req.flash('error', 'No user found with the provided email.');
+
+            res.redirect('/forgot-password')
+        }
+    } catch (error) {
+        console.log(error)
+    }
+}
     module.exports = {
+        signIn,
         signUp,
         insertUser,
+        getOtp,
         verifyOTP,
-        // otpVerificationEmail,
         homePage,
         verifyLogin,
         resendOTP,
-        userLogin
+        successGoogleLogin,
+        failureGoogleLogin,
+        loadShopPage,
+        loadProductDetails,
+        forgotPassword,
+        resetPassword
+        
 
 
     }

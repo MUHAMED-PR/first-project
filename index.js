@@ -8,14 +8,21 @@ const express = require('express')
 const path = require('path')
 const nocache = require('nocache')
 const dotenv=require('dotenv')
+dotenv.config()
 const  bodyParser = require('body-parser')
 const flash = require('express-flash')
-dotenv.config()
 const app = express();
+const sesion=require('express-session')
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended:true}))
 
 app.set('view engine','ejs');
+
+app.use(sesion({
+    resave:false,
+    saveUninitialized:true,
+    secret:process.env.SESSION_SECRET
+}));
 
 
 app.use(express.static(path.join(__dirname,'public')))
@@ -25,6 +32,7 @@ app.use(flash())
 
 const userRoute=require("./router/userRoute");
 const adminRoute = require('./router/adminRoute');
+const { session } = require('passport')
 
 
 
