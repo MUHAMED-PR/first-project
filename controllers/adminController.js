@@ -2,6 +2,7 @@ const users = require('../models/users')
 const categoryModel = require('../models/category')
 const productModel = require('../models/product')
 const bcrypt = require('bcrypt')
+const flash = require('express-flash')
 
 
 const adminLoad = async(req,res)=>{
@@ -17,7 +18,7 @@ const adminVerify = async(req,res)=>{
     try {
         // console.log('admin verify...');
         const email = req.body.email
-        console.log(email,'email');
+        // console.log(email,'email');
         const password = req.body.password
         // console.log(password,'password');
 
@@ -30,7 +31,7 @@ const adminVerify = async(req,res)=>{
 
             if(matchPassword){
                 req.session.adminId=adminData._id
-                res.render('admin/dashboard')
+                res.redirect('/admin/dashboard')
             }else{
                 res.render('admin/login', {message:'Incorrect Password'})
             }
@@ -103,7 +104,7 @@ const UserBlock = async (req, res) => {
 const products = async (req,res)=>{
     try{
         let product  = await  productModel.find()
-        console.log(product)
+        // console.log(product)
         res.render('admin/products',{product})
     }catch(error){
         console.log(error)
@@ -137,7 +138,8 @@ const addCategory = async(req,res)=>{
         const regex = new RegExp(categoryName,"i")
         const exstingCategory = await categoryModel.findOne({categoryName:regex})
         if(exstingCategory){
-            return res.render('admin/addCategory',{ message: 'Category already exists!' })
+            req.flash('error','Category is already existed!')
+            return res.redirect('/admin/loadaddCategory')
         }
         // console.log('existing section overxxx')
 
@@ -151,9 +153,13 @@ const addCategory = async(req,res)=>{
         // console.log(savedCategory,'  savedCategory');
 
         if(savedCategory){
-            res.render('admin/addCategory',{ message: 'Category  Added' })
+            req.flash('success','Category added.')
+            res.redirect('/admin/loadaddCategory')
+           
         }else{
-            res.render('admin/addCategory',{ message:'Category doesnot added'})
+            req.flash('error','Category doesnot added')
+            res.redirect('/admin/loadaddCategory')
+
         }
 
     } catch (error) {
@@ -161,6 +167,82 @@ const addCategory = async(req,res)=>{
         res.render('admin/addCategory',{ message:'505 internal server error!'})
     }
 }
+
+const updateCategory = async(req,res)=>{
+    try {
+        const {categoryId,editName,editDescription}=req.body
+        console.log(editDescription,' is editedDescription');
+        // console.log(categoryId,'id',editName,'editName',editDescription,'editedDescription');
+        const currentCategory = await categoryModel.findOne({_id:categoryId})
+        // console.log(currentCategory.description,' is the description ');
+        // console.log(editDescription, 'is the edited description');
+
+        const regex = new RegExp(`^${editName}$`, "i");
+        // console.log(regex,'regex');
+        const existingCategory = await categoryModel.findOne({categoryName:regex})
+
+        
+        if(existingCategory&&currentCategory.description!=editDescription){
+            req.flash('success','description successfully changed')
+            return res.redirect('/admin/category')
+        }else if(existingCategory){
+            req.flash('error','Category is already exist!')
+           return res.redirect('/admin/category')
+            
+        }
+        // const editCategory = new categoryModel({
+        //     categoryName:editName,
+        //     description:editDescription
+        // })
+
+        const updateDetails = await categoryModel.updateOne({_id:categoryId},{$set:{
+            categoryName:editName,
+            description:editDescription
+        }})
+        console.log(updateCategory,' is the updated data');
+
+        if(updateDetails){
+            req.flash('success', 'Category updated successfully.');
+            return res.redirect('/admin/category');
+        }else{
+            req.flash('error', 'Category not updated .');
+            return res.redirect('/admin/category');
+        }
+
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+const categoryListing = async (req, res) => {
+    try {
+        const categoryId = req.body.categoryId.trim(); // Trim any whitespace
+        console.log(categoryId,'category category listing');
+        // console.log(categoryId, 'is the categoryId');
+
+        // Find the category by its ID
+        const category = await categoryModel.findById(categoryId);
+        console.log(category,'category');
+        // console.log(category, 'category');
+
+        if (!category) {
+            return res.status(404).json({ message: 'Category not found' });
+        }
+
+        // Toggle the is_status field
+        const updatedCategory = await categoryModel.findByIdAndUpdate(
+            categoryId, 
+            { $set: { is_status: !category.is_status } }, 
+            { new: true }
+        );
+
+        res.status(200).json({ message: 'Category updated', category: updatedCategory });
+    } catch (error) {
+        console.error('Error updating category:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
 
 const loadAddProduct = async(req,res)=>{
     try {
@@ -210,6 +292,8 @@ module.exports ={
     category,
     loadaddCategory,
     addCategory,
+    updateCategory,
+    categoryListing,
     loadAddProduct,
     addProduct
 }

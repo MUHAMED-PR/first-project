@@ -9,7 +9,7 @@ const categorySchema = new mongoose.Schema({
         type:String,
         required:true
     },
-    is_block:{
+    is_status:{
         type:Boolean,
         required:true,
         default:false

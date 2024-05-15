@@ -34,6 +34,8 @@ adminRoute.post('/login',adminController.adminVerify)
 adminRoute.get('/blockUser',adminController.UserBlock)
 adminRoute.get('/loadaddCategory',adminController.loadaddCategory)
 adminRoute.post('/addCategory',adminController.addCategory)
+adminRoute.post('/updateCategory',adminController.updateCategory)
+adminRoute.post('/listCategory',adminController.categoryListing)
 adminRoute.get('/loadAddProduct',adminController.loadAddProduct)
 adminRoute.post('/addProduct',adminController.addProduct)
 

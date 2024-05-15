@@ -72,7 +72,21 @@
                   <!-- Your table content here -->
                   <h5 class="card-header">CATEGORIES</h5>
                 <div class="table-responsive text-nowrap">
+
+              <!-- ============ messages ======== -->
+                  <% if (messages.error) { %>
+                    <div class="alert text-danger">
+                        <%= messages.error %>
+                    </div>
+                <% } %>
                 
+                <% if (messages.success) { %>
+                    <div class="alert text-success">
+                        <%= messages.success %>
+                    </div>
+                <% } %>
+
+           <!-- ======================== -->
                     <a href="/admin/loadaddCategory" class="btn btn-outline-primary   btn-lg "><i class="bi bi-plus-circle"></i> Add Category</a>
                   <table class="table">
                     <thead>
@@ -85,33 +99,35 @@
                       </tr>
                     </thead>
                     <tbody class="table-border-bottom-0">
-                        
-                      <% category.forEach((category,index)=>{  %>
+                      <% category.forEach((category, index) => { %>
                         <tr>
-                            <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong><%= index+1 %></strong></td>
-                            
-                            <td><%= category.categoryName %></td>
-                            <td><%= category.description %></td>
-                            <td>
-                                <div class="dropdown">
-                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                                        <i class="bx bx-dots-vertical-rounded"></i>
-                                    </button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="javascript:void(0);" onclick="editCategory()">
-                                            <i class="bx bx-edit-alt me-1"></i> Edit
-                                        </a>
-                                        <a class="dropdown-item" href="javascript:void(0);" onclick="toggleBlock()">
-                                            <i class="bx bx-block me-1"></i> Block/Unblock
-                                        </a>
-                                    </div>
-                                </div>
-                            </td>
-                            
-                          </tr>	
-                    
+                          <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong><%= index + 1 %></strong></td>
+                          <td><%= category.categoryName %></td>
+                          <td><%= category.description %></td>
+                          <td>
+                            <div class="dropdown">
+                              <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                              </button>
+                              <div class="dropdown-menu">
+                                <button class="dropdown-item" onclick="editCategory('<%= category._id %>', '<%= category.categoryName %>', '<%= category.description %>')" data-bs-toggle="modal" data-bs-target="#editCategoryModal">
+                                  <i class="bx bx-edit-alt me-1"></i> Edit
+                                </button>
+                                <button class="dropdown-item " id="listingBtn<%= category._id %>" onclick="categoryListing('<%= category._id %>')">
+                                  <% console.log(category._id,'dfdf'); %>
+                                  <% if(category.is_status){  %>
+                                    <span><i class="bx bx-block me-1"></i>Unlisted</span>
+                                    <% }else{  %>
+                                      <span><i class="bx bx-check-circle me-1"></i> Listed</span> 
+                                      <% } %>
+                                </button>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
                       <% }) %>
                     </tbody>
+                    
                   </table>
                 </div>
                 
@@ -137,19 +153,87 @@
   
      
      <!-- ================================================      -->
-      <script>
-        function editCategory() {
-            // Perform edit operation here
-            console.log("Edit clicked");
-        }
+     <script>
+      function editCategory(id, name, description) {
+        // Set the form action URL
+        const form = document.getElementById('editCategoryForm');
+        
     
-        function toggleBlock() {
-            // Perform block/unblock operation here
-            console.log("Block/Unblock clicked");
+        // Set the input values
+        document.getElementById('categoryId').value = id;
+        console.log(id,'id in ejs page');
+        document.getElementById('categoryName').value = name;
+        document.getElementById('description').value = description;
+      }
+    
+      function categoryListing(categoryId) {
+        // console.log(categoryId,'category id in fetch');
+    fetch('/admin/listCategory', {
+        method: 'POST', // Use POST method
+        headers: {
+            'Content-Type': 'application/json' // Set the appropriate headers
+        },
+        body: JSON.stringify({ categoryId: categoryId.trim() }) // Include the body with JSON data
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+        if (data.category) {
+            const statusButton = document.getElementById(`listingBtn-${categoryId}`);
+            console.log(statusButton,'status button');
+            // window.location.href='/admin/category'
+            
+            console.log('statusButton reached......')
+            if (data.category.is_status===true) {
+              // console.log('-*************');
+                statusButton.innerHTML = '<span><i class="bx bx-block me-1"></i>Unlisted</span>';
+                // window.location.href='/admin/category'
+            } else {
+                statusButton.innerHTML = '<span><i class="bx bx-check-circle me-1"></i> Listed</span>';
+                // console.log('&&&&&&&&&&&&');
+                // window.location.href='/admin/category'
+
+            }
         }
+        
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
     </script>
     
-           
+
+ <!-- Bootstrap Modal -->
+<div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="editCategoryModalLabel">Edit Category</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+              <!-- Form for editing category details -->
+              <form id="editCategoryForm" action="/admin/updateCategory" method="POST">
+                  <!-- Input fields for editing category details -->
+                  <input type="hidden" class="form-control" id="categoryId"  name="categoryId" value="" >
+
+                  <div class="mb-3">
+                      <label for="categoryName" class="form-label">Category Name</label>
+                      <input type="text" class="form-control" id="categoryName" name="editName" value="">
+                  </div>
+                  <div class="mb-3">
+                      <label for="description" class="form-label">Description</label>
+                      <input type="text" class="form-control" id="description" name="editDescription" value="">
+                  </div>
+                  <button type="submit" class="btn btn-primary">Update</button>
+              </form>
+          </div>
+         
+      </div>
+  </div>
+</div>
 
 
 <%- include('../layouts/adminFooter.ejs') %>

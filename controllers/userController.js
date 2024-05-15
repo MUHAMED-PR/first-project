@@ -91,20 +91,17 @@ const getOtp = async (req,res)=>{
 //registration of a user
 const insertUser = async (req, res) => {
     try {
-        res.render('user/signUp')
+        let message = ''; // Define message outside of any conditional scope
 
         const regex = new RegExp(req.body.email, 'i');
         const emailExisting = await users.findOne({ email: regex });
-        
-
-       
 
         if (emailExisting) {
-            const message = 'This email is already registered!'
-            return res.render('user/signUp', { message: message })
+            message = 'This email is already registered!'; // Update the existing message variable
+            return res.render('user/signUp', { message: message });
         }
-        const spassword = await securePassword(req.body.password)
-        // console.log('spassword.....     '+spassword)
+
+        const spassword = await securePassword(req.body.password);
 
         const user = new users({
             userName: req.body.name,
@@ -112,33 +109,25 @@ const insertUser = async (req, res) => {
             password: spassword,
             cpassword: spassword,
             mobile: req.body.mobile
-        })
-       
-        const userData = await user.save()
-        console.log('userData....     '+userData)
+        });
+
+        const userData = await user.save();
 
         if (userData) {
-            const genotp = otpGenerate()
-            console.log(genotp + ' is the otp');
-            req.session.email = req.body.email
-           
-            let savingotp = saveOtp(req.body.email , genotp)
-            let response = sendVerifyMail(req.body.name, req.body.email, userData._id, genotp)
-
-            // const message = 'your registration has been successful'
-            // res.render('registration',{message:message})
-            console.log(typeof message)
-            res.render('user/OTP',{message:''})
+            const genotp = otpGenerate();
+            console.log(genotp,' is genotp')
+            req.session.email = req.body.email;
+            let savingotp = saveOtp(req.body.email, genotp);
+            let response = sendVerifyMail(req.body.name, req.body.email, userData._id, genotp);
+            return res.render('user/OTP', { message: '' });
+        } else {
+            message = 'Your registration has failed'; // Update the existing message variable
+            return res.render('user/signUp', { message: message });
         }
-        else {
-            const message = 'your registration has been failed'
-            res.render('user/signUp', { message:''})
-        }
-
     } catch (error) {
         console.log(error.message);
     }
-}
+};
 
 
 // //for send mail

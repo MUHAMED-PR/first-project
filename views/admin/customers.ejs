@@ -80,7 +80,7 @@
                                     <td><%= customer.mobile%></td>
                                     <td>
                                       <div class="btn-group" >
-                                        <button type="button" class="btn btn-sm <%= customer.is_blocked ? 'btn-success' : 'btn-danger' %> blockButton" onclick="blockUser('<%= customer._id%>')">
+                                        <button type="button" class="<%= customer.is_blocked ? 'btn-success' : 'btn-danger' %> " onclick="blockUser('<%= customer._id%>')">
                                             <i class="me-1 "></i>
                                             <% if(customer.is_blocked){%>
                                               <span class="blockText  icon">Unblock</span>
@@ -115,7 +115,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
 function blockUser(userId){
-      console.log('heereeeeeeee',userId);
+      console.log('heereeeeeeee',userId);  
       fetch(`/admin/blockUser?id=${userId}`)
       .then(()=>{
         console.log('fetch setted');
@@ -124,7 +124,7 @@ function blockUser(userId){
       }).catch(()=>{
         console.log('error in fetch');
       })
-    }
+    } 
 
 
 //    document.addEventListener("DOMContentLoaded", function() {
