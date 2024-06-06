@@ -4,7 +4,7 @@ const path = require('path')
 const session = require('express-session')
 const adminController = require('../controllers/adminController')
 const app = express()
-const auth = require('../middleware/adminAuth')
+const adminAuth = require('../middleware/adminAuth')
 const multer = require('multer')
 
 const storage = multer.diskStorage({
@@ -26,10 +26,10 @@ app.set('views', '../views/admin');
 
 adminRoute.get('/',adminController.adminLoad)
 adminRoute.get('/login',adminController.adminLogin)
-adminRoute.get('/dashboard',auth.isLogin,adminController.dashboard)
-adminRoute.get('/customer',adminController.costumers)
-adminRoute.get('/products',adminController.products)
-adminRoute.get('/category',auth.isLogin,adminController.category)
+adminRoute.get('/dashboard',adminAuth.isLogin,adminController.dashboard)
+adminRoute.get('/customer',adminAuth.isLogin,adminController.costumers)
+adminRoute.get('/products',adminAuth.isLogin,adminController.products)
+adminRoute.get('/category',adminAuth.isLogin,adminController.category)
 adminRoute.post('/login',adminController.adminVerify)
 adminRoute.get('/blockUser',adminController.UserBlock)
 adminRoute.get('/loadaddCategory',adminController.loadaddCategory)
@@ -37,7 +37,10 @@ adminRoute.post('/addCategory',adminController.addCategory)
 adminRoute.post('/updateCategory',adminController.updateCategory)
 adminRoute.post('/listCategory',adminController.categoryListing)
 adminRoute.get('/loadAddProduct',adminController.loadAddProduct)
-adminRoute.post('/addProduct',adminController.addProduct)
+adminRoute.post('/addProduct', upload.array('images', 4),adminController.addProduct)
+adminRoute.get('/editProduct',adminController.loadEditProduct)
+adminRoute.post('/editProduct/:id',adminController.updateProduct)
+adminRoute.post('/listProduct',adminController.productListing)
 
 
 

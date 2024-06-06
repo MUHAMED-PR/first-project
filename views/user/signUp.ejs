@@ -135,7 +135,16 @@
 							        <a class="nav-link active" id="register-tab-2" data-toggle="tab" href="#register-2" role="tab" aria-controls="register-2" aria-selected="true">Register</a>
 							    </li>
 							</ul>
-							
+                            <br>
+                            <div>
+                                            
+                                <% if(typeof message != ' undefined ') { %>
+
+                                    <p class="   text-danger     text-center  "><%= message %></p>
+
+                              <%  } %>
+                                  
+                            </div>
 
 							    <div class="tab-pane fade show active" id="register-2" role="tabpanel" aria-labelledby="register-tab-2">
 							    	<form action="/signUp" method="post" onsubmit="return validateForm()">
@@ -181,15 +190,7 @@
 											</div>
 							    		</div>
 
-                                        <div>
-                                            
-                                            <% if(typeof message != ' undefined ') { %>
-
-                                                <p class="   text-danger     text-center  "><%= message %></p>
-
-                                          <%  } %>
-                                              
-                                        </div>
+                                       
 
                                         
                                         
@@ -307,7 +308,7 @@
         
             var isValid = true;
         
-            if (name.trim() === "") {
+            if (name.trim() === "") {   
                 displayErrorMessage("register-name-2", "nameError", "Please enter your name.");
                 isValid = false;
             }

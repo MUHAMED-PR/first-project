@@ -2,10 +2,15 @@ const express = require('express')
 const userRoute = express.Router()
 const path = require('path')
 // const session = require('express-session')
-const userController = require("../controllers/userController");
+
 const app = express()
-const config = require('../config/config')
+// const config = require('../config/config')
 const auth = require('../middleware/auth')
+const userController = require("../controllers/userController");
+const cartController = require('../controllers/cartController')
+
+
+
 const passport = require('passport')
 require('../passport')
 
@@ -47,16 +52,32 @@ userRoute.get('/failure', userController.failureGoogleLogin)
 userRoute.get('/',userController.homePage)
 userRoute.get('/signIn',userController.signIn);
 userRoute.get('/signUp',userController.signUp);
+userRoute.get('/logout',userController.logout)
 userRoute.get('/OTP',userController.getOtp)
 userRoute.post('/signUp',userController.insertUser)
 userRoute.post('/home',userController.verifyOTP)
 userRoute.get('/resend',userController.resendOTP)
 userRoute.post('/userlogin',userController.verifyLogin) 
-userRoute.get('/shopPage',userController.loadShopPage)
+userRoute.get('/productPage',userController.loadProductPage)
 userRoute.get('/productDetails/:productId',userController.loadProductDetails)
+
+//forgot password
 userRoute.get('/forgot-password',userController.forgotPassword)
 userRoute.post('/forgot-password',userController.resetPassword)
+userRoute.get('/otpresetPassword',userController.otpResetPassword)
+userRoute.get('/setNewPassword',userController.setNewPassword)
+userRoute.post('/ResetPasswordOTPverify',userController.ResetPasswordOTPverify)
+userRoute.get('/ResetPasswordREsendOTP',userController.ResetPasswordREsendOTP)
+userRoute.post('/changePassword',userController.changePassword)
 
+userRoute.get('/userProfile',auth.isLogin,userController.userProfile)
+
+
+//cart
+userRoute.get('/cartPage',auth.isLogin,cartController.loadcart)
+userRoute.post('/addToCart',cartController.addToCart)
+userRoute.get('/removeCart/:productID',cartController.removeCart)
+userRoute.patch('/ProductQuantity',cartController.productQuantity)
 
 
 

@@ -43,7 +43,7 @@ const isUserBlocked = async(req,res,next)=>{
     }
 }
 module.exports={
-    // isLogin,
+    isLogin,
     // isLogout,
     // isUserBlocked
 }

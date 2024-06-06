@@ -18,6 +18,19 @@
           <div class="container-xxl flex-grow-1 container-p-y">
             <h4 class="fw-bold py-3 mb-4">Add Product</h4>
 
+            
+              <% if (messages.error) { %>
+                  <div class="alert text-danger">
+                      <%= messages.error %>
+                  </div>
+              <% } %>
+              
+              <% if (messages.success) { %>
+                  <div class="alert text-success">
+                      <%= messages.success %>
+                  </div>
+              <% } %>
+
 
             <!-- Basic Layout & Basic with Icons -->
             <div class="row">
@@ -26,7 +39,7 @@
                 <div class="card mb-4">
                   
                   <div class="card-body">
-                    <form action="/admin/addProduct" method="post">
+                    <form action="/admin/addProduct" method="post" enctype="multipart/form-data">
                       
                       <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="basic-default-company">Product Name</label>
@@ -101,29 +114,29 @@
                             <div class="row">
                                 <div class="card-body col-sm-3">
                                     <div class="input-upload">
-                                        <img src="/public/admin/assets/img/images.png" alt="" id="image-preview1" class="preview-image" />
-                                        <input class="form-control" type="file" name="image1" data-id="1"  />
+                                        <img src="" alt="" id="image-preview1" class="preview-image" />
+                                        <input class="form-control" type="file" name="images" data-id="1"  />
                                         <button type="button" class="btn btn-sm btn-danger remove-button" data-id="1" style="display: none;">Remove</button>
                                     </div>
                                 </div>
                                 <div class="card-body col-sm-3">
                                     <div class="input-upload">
                                         <img src="/public/admin/assets/img/images.png" alt="" id="image-preview2" class="preview-image" />
-                                        <input class="form-control" type="file" name="image2" data-id="2"   />
+                                        <input class="form-control" type="file" name="images" data-id="2"   />
                                         <button type="button" class="btn btn-sm btn-danger remove-button" data-id="2" style="display: none;">Remove</button>
                                     </div>
                                 </div>
                                 <div class="card-body col-sm-3">
                                     <div class="input-upload">
                                         <img src="/public/admin/assets/img/images.png" alt="" id="image-preview3" class="preview-image" />
-                                        <input class="form-control" type="file" name="image3" data-id="3"   />
+                                        <input class="form-control" type="file" name="images" data-id="3"   />
                                         <button type="button" class="btn btn-sm btn-danger remove-button" data-id="3" style="display: none;">Remove</button>
                                     </div>
                                 </div>
                                 <div class="card-body col-sm-3">
                                     <div class="input-upload">
                                         <img src="/public/admin/assets/img/images.png" alt="" id="image-preview4" class="preview-image" />
-                                        <input class="form-control" type="file" name="image4" data-id="4"   />
+                                        <input class="form-control" type="file" name="images" data-id="4"   />
                                         <button type="button" class="btn btn-sm btn-danger remove-button" data-id="4" style="display: none;">Remove</button>
                                     </div>
                                 </div>
@@ -191,4 +204,41 @@
   <script async defer src="https://buttons.github.io/buttons.js"></script>
 
  
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Select all file input elements
+        var fileInputs = document.querySelectorAll('input[type="file"]');
+    
+        fileInputs.forEach(function(input) {
+            input.addEventListener('change', function(e) {
+                var reader = new FileReader();
+                reader.onload = function(event) {
+                    // Create a temporary element to hold the preview
+                    var imgPreview = document.createElement('div');
+                    imgPreview.style.width = '100px';
+                    imgPreview.style.height = '100px';
+                    imgPreview.style.marginRight = '10px';
+    
+                    // Create an img element to display the preview
+                    var imgElement = document.createElement('img');
+                    imgElement.src = event.target.result;
+                    imgElement.style.width = '100%';
+                    imgElement.style.height = 'auto';
+    
+                    // Append the img element to the temporary div
+                    imgPreview.appendChild(imgElement);
+    
+                    // Find a suitable place in your DOM to append the preview
+                    // This depends on your specific layout
+                    var previewContainer = document.querySelector('.image-gallery'); // Adjust selector as needed
+                    previewContainer.appendChild(imgPreview);
+                };
+    
+                // Read the file as a Data URL
+                reader.readAsDataURL(e.target.files[0]);
+            });
+        });
+    });
+    </script>
+    
 <%- include('../layouts/adminFooter.ejs') %>

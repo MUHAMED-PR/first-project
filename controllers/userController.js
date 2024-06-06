@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt')
 const { tryCatch } = require('engine/utils')
 const nodemailer = require('nodemailer')
 const flash = require('express-flash')
+const { findById } = require('../models/category')
 require('dotenv').config()
 
 
@@ -19,9 +20,19 @@ const securePassword = async (password) => {
     }
 }
 
-const homePage = (req,res)=>{
+const homePage = async (req, res) => {
     try {
-        res.render('user/homePage')
+        const user = req.session.user_id
+        if (user) {
+            const userData = await users.findById(user)
+            // console.log(userData);
+            res.render('user/homePage', {userData })
+
+        } else {
+
+            res.render('user/homePage')
+        }
+
     } catch (error) {
         console.log(error);
     }
@@ -36,16 +47,16 @@ const signIn = (req, res) => {
 
     }
 }
-const signUp = async(req,res)=>{
+const signUp = async (req, res) => {
     try {
-        res.render('user/signUp', {message:''})
+        res.render('user/signUp', { message: '' })
     } catch (error) {
         console.log(error)
     }
 }
-const otpGenerate =  (req,res) => {
+const otpGenerate = (req, res) => {
     try {
-console.log('otp is generating');
+        console.log('otp is generating');
         const digits = '0123456789';
         let OTP = '';
         for (let i = 0; i < 4; i++) {
@@ -61,7 +72,15 @@ console.log('otp is generating');
 
 }
 
+const logout = async(req,res)=>{
+    try {
+        req.session.email = null; // Clear email from session
+        res.render('user/homePage')
 
+    } catch (error) {
+        console.log(error);
+    }
+}
 
 const saveOtp = async (email, otp) => {
     try {
@@ -72,7 +91,7 @@ const saveOtp = async (email, otp) => {
             email: email,
             otp: otp
         })
-       await saveOtp.save();
+        await saveOtp.save();
 
 
     } catch (error) {
@@ -81,11 +100,11 @@ const saveOtp = async (email, otp) => {
 }
 
 
-const getOtp = async (req,res)=>{
+const getOtp = async (req, res) => {
     try {
         res.render('user/OTP')
     } catch (error) {
-        console.error('Error foundednin get otp',error);
+        console.error('Error foundednin get otp', error);
     }
 }
 //registration of a user
@@ -115,8 +134,9 @@ const insertUser = async (req, res) => {
 
         if (userData) {
             const genotp = otpGenerate();
-            console.log(genotp,' is genotp')
+            console.log(genotp, ' is genotp')
             req.session.email = req.body.email;
+
             let savingotp = saveOtp(req.body.email, genotp);
             let response = sendVerifyMail(req.body.name, req.body.email, userData._id, genotp);
             return res.render('user/OTP', { message: '' });
@@ -174,7 +194,6 @@ const sendVerifyMail = async (name, email, user_id, otp) => {
         console.log(error.message);
     }
 }
-
 const verifyOTP = async (req, res) => {
     try {
         console.log(req.body.otp+'it is otpppppppp')
@@ -226,107 +245,112 @@ const resendOTP = async (req,res)=>{
     }
 }
 
-const verifyLogin = async(req,res)=>{
-    try{
+
+const verifyLogin = async (req, res) => {
+    try {
         const email = req.body.email
-        const password =req.body.password
-        const userData = await users.findOne({email:email})
+        const password = req.body.password
+        const userData = await users.findOne({ email: email })
 
-        if(userData){
-            const passwordMatch = await bcrypt.compare(password,userData.password)
-                if(passwordMatch){
-                    if(userData.is_blocked==false){
-                        if(!userData.is_verified){
-                            const genotp = otpGenerate()
-                            console.log(genotp + ' is the otp');
-                            req.session.email = req.body.email
-                            
-                            let savingotp = saveOtp(req.body.email , genotp)
-                            let response = sendVerifyMail(req.body.name, req.body.email, userData._id, genotp)
-                            res.render('user/OTP', { message:'please verify your email' })
-                        }else{
-                            req.session.user_id=userData._id
-                            res.render('user/homePage', {message:''})
-                        }
+        if (userData) {
+            const passwordMatch = await bcrypt.compare(password, userData.password)
+            if (passwordMatch) {
+                if (userData.is_blocked == false) {
+                    if (!userData.is_verified) {
+                        const genotp = otpGenerate()
+                        console.log(genotp + ' is the otp');
+                        req.session.email = req.body.email
 
-                    }else{
-                        console.log('admin is blocked you !..')
-                        res.render('user/signIn', {message:'Admin is blocked You !..'})
+                        let savingotp = saveOtp(req.body.email, genotp)
+                        let response = sendVerifyMail(req.body.name, req.body.email, userData._id, genotp)
+                        res.render('user/OTP', { message: 'please verify your email' })
+                    } else {
+                        // console.table(userData);
+                        req.session.user_id = userData._id
+                        // res.render('user/homePage', {message:''})
+                        res.redirect('/')
                     }
 
-                }else{
-                    res.render('user/signIn', { message:'Password is incorrect' })
+                } else {
+                    console.log('admin is blocked you !..')
+                    res.render('user/signIn', { message: 'Admin is blocked You !..' })
                 }
-            
-        }else{
-            res.render('user/signIn', { message:'Email  is incorrect' })
+
+            } else {
+                res.render('user/signIn', { message: 'Password is incorrect' })
+            }
+
+        } else {
+            res.render('user/signIn', { message: 'Email  is incorrect' })
         }
-    }catch(error){
+    } catch (error) {
         console.log(error);
     }
 }
 
 //Auth for Google with login
-const successGoogleLogin = async (req,res)=>{
+const successGoogleLogin = async (req, res) => {
     console.log('google')
-   
-        res.render('user/homePage')
-       
-        // res.send('Welcome ',req.user.email)
-    }
+
+    res.render('user/homePage')
+
+    // res.send('Welcome ',req.user.email)
+}
 
 
 
-const failureGoogleLogin = async(req,res)=>{
+const failureGoogleLogin = async (req, res) => {
     console.log('Error');
 }
 
-const loadShopPage = async(req,res)=>{
+const loadProductPage = async (req, res) => {
     try {
         const products = await product.find()
 
-        res.render('user/shop',{products})
+        res.render('user/product', { products })
     } catch (error) {
         console.log(error)
     }
 }
 
-const loadProductDetails = async(req,res)=>{
+const loadProductDetails = async (req, res) => {
     try {
-       
-       const productId = req.params.productId
-       console.log(productId,' productId')
-        const productdetails = await product.findOne({_id:productId})
+
+        const productId = req.params.productId
+        // console.log(productId, ' productId')
+        const productdetails = await product.findOne({ _id: productId })
         // console.log(productdetails+"it is productdetails")
-        console.log('jhnjkbjhb');
-        res.render('user/product',{productdetails})
+        
+        res.render('user/productDtails', { productdetails })
     } catch (error) {
         console.log(error)
     }
 }
 
-const forgotPassword = async(req,res)=>{
+const forgotPassword = async (req, res) => {
     try {
-        res.render('user/forgotPass',{message:''})
+        res.render('user/forgotPass', { message: '' })
     } catch (error) {
         console.log(error)
     }
 }
 
-const resetPassword = async(req,res)=>{
+const resetPassword = async (req, res) => {
     try {
-       const theEmail = req.body.email
-        const emailCheck = await users.findOne()
-        if(emailCheck.theEmail){
+        const theEmail = req.body.email
+        const emailCheck = await users.findOne({ email: theEmail })
+        // console.log(emailCheck,' is the checked email for reset password')
+        if (emailCheck) {
+            req.session.email = emailCheck.email
             const genotp = otpGenerate()
             console.log(genotp + ' is the otp');
 
-            let savingotp = saveOtp(emailCheck.userName , genotp)
+            let savingotp = saveOtp(emailCheck.email, genotp)
             let response = sendVerifyMail(emailCheck.userName, emailCheck.email, emailCheck._id, genotp)
             req.flash('success', 'An OTP has been sent to your email. Please check your inbox.');
 
-            res.redirect('/OTP')
-        }else{
+            res.redirect('/otpResetPassword')
+        } else {
             req.flash('error', 'No user found with the provided email.');
 
             res.redirect('/forgot-password')
@@ -335,22 +359,125 @@ const resetPassword = async(req,res)=>{
         console.log(error)
     }
 }
-    module.exports = {
-        signIn,
-        signUp,
-        insertUser,
-        getOtp,
-        verifyOTP,
-        homePage,
-        verifyLogin,
-        resendOTP,
-        successGoogleLogin,
-        failureGoogleLogin,
-        loadShopPage,
-        loadProductDetails,
-        forgotPassword,
-        resetPassword
-        
 
-
+const otpResetPassword = async (req, res) => {
+    try {
+        res.render('user/otpResetPassword')
+    } catch (error) {
+        console.log(error);
     }
+}
+
+const setNewPassword = async (req, res) => {
+    try {
+        res.render('user/setNewPassword')
+    } catch (error) {
+        console.log(error);
+    }
+}
+const ResetPasswordOTPverify = async (req, res) => {
+    try {
+        const storedOTP = await OTP.findOne({ email: req.session.email })
+        console.log(storedOTP, ' is storedOTP')
+
+        if (storedOTP.otp === req.body.otp) {
+            res.redirect('/setNewPassword')
+        } else {
+            // Render the OTP page with the error message
+            // req.flash('error','OTP is not matched')
+            res.render("user/otpResetPassword", { message: 'OTP is not matched' });
+        }
+
+
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+const ResetPasswordREsendOTP = async (req, res) => {
+    try {
+        const reOtp = otpGenerate()
+        console.log(reOtp + ' is the reOTP');
+        console.log(req.session.email, '  email on session..');
+
+        const id = await users.findOne({ email: req.session.email })
+
+        let saveReOtp = saveOtp(req.session.email, reOtp)
+        let response = sendVerifyMail(id.name, req.session.email, id._id, reOtp)
+
+        res.redirect('/otpResetPassword')
+
+
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+const changePassword = async (req, res) => {
+    try {
+        const newPassword = req.body.newPassword
+        const newCPassword = req.body.confirmPassword
+
+        if (newPassword === newCPassword) {
+        const hashedPass  =  await bcrypt.hash(newPassword, 10)
+
+        const updatedPass = await users.updateOne({email:req.session.email},{$set:{password:hashedPass}})
+            // document.addEventListener('DOMContentLoaded', (event) => {
+            //     const message = "<%= message %>";
+            //     if (message) {
+            //         swal({
+            //             title: "Success!",
+            //             text: message,
+            //             icon: "success",
+            //             button: "OK",
+            //             timer: 3000,
+            //         });
+            //     }
+            // });
+            req.flash('success', 'Password changed successfully')
+            res.redirect('/signIn')
+        } else {
+            req.flash('error', 'confirm password not matched!...')
+            res.redirect('/setNewPassword')
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+const userProfile = async(req,res)=>{
+    try {
+        const {user_id} = req.session
+        console.log(user_id) 
+        const user = await users.find({_id:user_id})
+        res.render('user/userProfile',{user})
+    } catch (error) {
+        console.log(error);
+    }
+}
+module.exports = {
+    signIn,
+    signUp,
+    logout,
+    insertUser,
+    getOtp,
+    verifyOTP,
+    homePage,
+    verifyLogin,
+    resendOTP,
+    successGoogleLogin,
+    failureGoogleLogin,
+    loadProductPage,
+    loadProductDetails,
+    forgotPassword,
+    resetPassword,
+    otpResetPassword,
+    setNewPassword,
+    ResetPasswordOTPverify,
+    ResetPasswordREsendOTP,
+    changePassword,
+    userProfile
+
+
+
+}

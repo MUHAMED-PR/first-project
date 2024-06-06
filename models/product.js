@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const category = require('./category')
+// const category = require('./category')
 // const { ObjectId } = require('mongodb')
 
 const productSchema = new mongoose.Schema({
@@ -16,18 +16,23 @@ const productSchema = new mongoose.Schema({
         required:true
     },
     images:{
-        type:Array
+        type:Array  
     },
     description:{
         type:String,
         required:true
     },
     category:{
-        // type:mongoose.Schema.Types.ObjectId,
-        // ref:'category',
-        type:String,
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'category',
+        // type:String,
         required:true,
         
+    },
+    is_status:{
+        type:Boolean,
+        default:false,
+        required:true
     }
 })
 module.exports= mongoose.model('products',productSchema)

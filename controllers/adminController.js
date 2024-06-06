@@ -103,8 +103,8 @@ const UserBlock = async (req, res) => {
 
 const products = async (req,res)=>{
     try{
-        let product  = await  productModel.find()
-        // console.log(product)
+        let product  = await  productModel.find().populate('category')
+      
         res.render('admin/products',{product})
     }catch(error){
         console.log(error)
@@ -199,7 +199,7 @@ const updateCategory = async(req,res)=>{
             categoryName:editName,
             description:editDescription
         }})
-        console.log(updateCategory,' is the updated data');
+        // console.log(updateCategory,' is the updated data');
 
         if(updateDetails){
             req.flash('success', 'Category updated successfully.');
@@ -217,7 +217,7 @@ const updateCategory = async(req,res)=>{
 const categoryListing = async (req, res) => {
     try {
         const categoryId = req.body.categoryId.trim(); // Trim any whitespace
-        console.log(categoryId,'category category listing');
+        // console.log(categoryId,'category category listing');
         // console.log(categoryId, 'is the categoryId');
 
         // Find the category by its ID
@@ -255,32 +255,132 @@ const loadAddProduct = async(req,res)=>{
 
 const addProduct = async(req,res)=>{
     try {
+        console.log('Request body:', req.body);
+        console.log('Request files:', req.files);
         const {productName,category,
-            productPrice,productQuantity,description,
-            image1,image2,image3,image4} = req.body
+            productPrice,productQuantity,
+            description} = req.body
+         console.log(productName,'productName');
+            // console.log(category,' category');
+            // console.log(image1,' is the image1')
+            const categoryId = await categoryModel.findOne({categoryName:category})
+            console.log(categoryId,'catergoryId over .......!!!!')
 
             const regex = new RegExp(productName,"i")
-            const existingProduct = await productModel.find({productName:regex})
-            // const categoryModels = await categoryModel.find()
-            // if(existingProduct){
-            //     res.render('admin/addProduct', {message:'Product name is already existed!',categoryModels})
-            // }
+            console.log(regex,'regex');
+            const existingProduct = await productModel.find({name:regex})
+            console.log(existingProduct,' is the existingProduct!!!!!!!!')
+            const categoryModels = await categoryModel.find()
+            if(existingProduct.length>0){
+                req.flash('error','Product name is already existed !')
+                return res.redirect('/admin/loadAddProduct')
+            }
+            let images = [];
+            if (req.files) {
+                images = req.files.map(file => '/admin/' + file.filename);
+            } else {
+                console.log('No files uploaded');
+            }
             const newProduct = new productModel({
                 name:productName,
                 price:productPrice,
                 quantity:productQuantity,
-                images:[image1,image2,image3,image4],
+                images: images,
                 description,
-                category:category
+                category:categoryId._id
 
             })
-           let products  =  await newProduct.save()
-           console.log(products+"toduckldfdlfkl")
-            res.redirect('/admin/products')
+          let productss  =  await newProduct.save()
+        //    console.log(products+"toduckldfdlfkl")
+            return res.redirect('/admin/products')
     } catch (error) {
         console.log(error)
     }
 }
+
+const loadEditProduct = async(req,res)=>{
+    try {
+        // console.log(`ggggggggggggggggggggggg`);
+        const {productId} = req.query
+    
+        // console.log(`productId is ${productId}`);
+        const category = await categoryModel.find({})
+        const product = await productModel.findById(productId)
+        console.log(product );
+        res.render('admin/editProduct',{product,category})
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+
+const updateProduct = async(req,res)=>{
+    try {
+        const productId=req.params.id
+        // console.log(productId, 'prodcut id in update product');
+        const {productName,category,productPrice,productQuantity,description}=req.body
+        const findCategory=await categoryModel.findOne({categoryName:category})
+        // console.log(productName ,'is the productName',category,productPrice,productQuantity,description);
+        const existingProduct = await productModel.find({
+            name: { $regex: `${productName}`, $options: 'i' },
+            _id: { $ne: productId }
+        });
+        if(existingProduct.length>0){
+            console.log('product already existed');
+            return res.redirect('/admin/products')
+
+        }
+        const updateFields = {
+            name: productName,
+            category: findCategory._id,
+            price: productPrice,
+            quantity: productQuantity,
+            description: description
+        };
+
+        // if (req.files) {
+        //     for (let i = 1; i <= 4; i++) {
+        //         if (req.files[`image${i}`]) {
+        //             updateFields[`image${i}`] = req.files[`image${i}`][0].filename;
+        //         }
+        //     }
+        // }
+        const updateProduct = await productModel.findByIdAndUpdate(productId, { $set: updateFields }, { new: true });
+        // console.log(updateProduct,'updateProduct');
+
+        req.flash('success','product updated successfully')
+        res.redirect('/admin/products')
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+const productListing = async(req,res)=>{
+    try {
+        const productId = req.body.productId.trim()
+        // console.log(productId,' is the productId');
+        const product = await productModel.findById(productId)
+        // console.log(product, ' is the product model shown')
+
+        if(!product){
+            return res.status(404).json({ message: 'Category not found' });
+        }
+
+        const updatedProduct = await productModel.findByIdAndUpdate(
+            productId, 
+            { $set: { is_status: !product.is_status } }, 
+            { new: true }
+        );
+
+        res.status(200).json({ message: 'Product  updated', product: updatedProduct });
+    } catch (error) {
+        console.error('Error updating Product:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
+
+
 module.exports ={
     adminLoad,
     adminLogin,
@@ -295,5 +395,8 @@ module.exports ={
     updateCategory,
     categoryListing,
     loadAddProduct,
-    addProduct
+    addProduct,
+    loadEditProduct,
+    updateProduct,
+    productListing
 }

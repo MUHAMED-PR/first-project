@@ -15,6 +15,7 @@ const app = express();
 const sesion=require('express-session')
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended:true}))
+const axios = require('axios')
 
 app.set('view engine','ejs');
 
